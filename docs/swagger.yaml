@@ -1,0 +1,251 @@
+basePath: /
+definitions:
+  model.CreateResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  model.CustomerCreate:
+    properties:
+      email:
+        type: string
+      fullname:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  model.CustomerItem:
+    properties:
+      email:
+        type: string
+      fullname:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  model.GetAllModel:
+    properties:
+      data:
+        items: {}
+        type: array
+      meta:
+        $ref: '#/definitions/model.PageMeta'
+    type: object
+  model.PageMeta:
+    properties:
+      page:
+        type: integer
+      pages:
+        type: integer
+      total:
+        type: integer
+    type: object
+  model.TokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  model.UserLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  pkg.Error:
+    properties:
+      message: {}
+    type: object
+host: localhost
+info:
+  contact:
+    email: frfatram@gmail.com
+    name: Fatur Rahman
+  description: This is a API server for Simple Login Online
+  title: Golang Test Documentation
+  version: "1.0"
+paths:
+  /admin/auth/login:
+    post:
+      consumes:
+      - application/json
+      - application/x-www-form-urlencoded
+      description: Masuk dengan akun admin
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Login admin
+      tags:
+      - Auth
+  /admin/customer/list:
+    get:
+      consumes:
+      - application/json
+      description: Menampilkan daftar customer
+      parameters:
+      - description: page_number
+        in: query
+        name: number
+        type: integer
+      - description: page_size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/model.GetAllModel'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.CustomerItem'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: List customer
+      tags:
+      - customer
+  /admin/customer/view/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Menampilkan satu customer
+      parameters:
+      - description: id customer
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.CustomerItem'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Get one customer
+      tags:
+      - customer
+  /customer/auth/login:
+    post:
+      consumes:
+      - application/json
+      - application/x-www-form-urlencoded
+      description: Masuk dengan akun customer
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Login customer
+      tags:
+      - Auth
+  /customer/registration:
+    post:
+      consumes:
+      - application/json
+      - application/x-www-form-urlencoded
+      description: Membuat customer
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CustomerCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/model.CreateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/pkg.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/pkg.Error'
+      summary: Register customer
+      tags:
+      - customer
+swagger: "2.0"
