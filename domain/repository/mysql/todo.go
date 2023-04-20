@@ -52,7 +52,7 @@ func (r *todoRepositoryImpl) Get(ctx context.Context, id int) (data *entity.Todo
 	return data, nil
 }
 
-func (r *todoRepositoryImpl) GetAll(ctx context.Context, activityID *int) (data []entity.Todo, err error) {
+func (r *todoRepositoryImpl) GetAll(ctx context.Context, activityID string) (data []entity.Todo, err error) {
 	query := `
 	SELECT
 		todo_id, activity_group_id, title, is_active, priority, created_at, updated_at
@@ -60,7 +60,7 @@ func (r *todoRepositoryImpl) GetAll(ctx context.Context, activityID *int) (data 
 		todos
 	`
 	args := []interface{}{}
-	if activityID != nil {
+	if activityID != "" {
 		query += " WHERE activity_group_id = ? "
 		args = append(args, activityID)
 	}

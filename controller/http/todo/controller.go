@@ -43,7 +43,7 @@ type GetAllTodoControllerImpl struct {
 func (ctr *GetAllTodoControllerImpl) GetAll(c echo.Context) (err error) {
 	filter := ctr.Filter
 
-	if err := c.Bind(filter); err != nil {
+	if err := c.Bind(&filter); err != nil {
 		c.Logger().Errorf("Error on GetAllTodoControllerImpl.GetAll: %s", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid request body").SetInternal(err)
 	}
@@ -119,9 +119,13 @@ func (ctr *DeleteTodoControllerImpl) Delete(c echo.Context) (err error) {
 		c.Logger().Errorf("Error on DeleteTodoControllerImpl.Delete: %s", err.Error())
 		return err
 	}
+	empty := struct {
+		ID int `json:"id,omitempty"`
+	}{}
 	response := model.BaseResponse{
 		Status:  "Success",
 		Message: "Success",
+		Data:    empty,
 	}
 	return c.JSON(http.StatusOK, response)
 }

@@ -16,7 +16,7 @@ type ActivityRepository interface {
 
 type TodoRepository interface {
 	Get(ctx context.Context, id int) (data *entity.Todo, err error)
-	GetAll(ctx context.Context, activityID *int) (data []entity.Todo, err error)
+	GetAll(ctx context.Context, activityID string) (data []entity.Todo, err error)
 	Create(ctx context.Context, data entity.Todo) (id int, err error)
 	Delete(ctx context.Context, id int) (err error)
 	Update(ctx context.Context, data entity.Todo) (err error)

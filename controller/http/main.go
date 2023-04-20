@@ -46,6 +46,10 @@ func (ctr *httpCtr) Start(host string, port int) {
 
 func customHTTPErrorHandler(err error, c echo.Context) {
 	response := model.BaseResponse{}
+	empty := struct {
+		ID int `json:"id,omitempty"`
+	}{}
+	response.Data = empty
 	var msg interface{}
 	code := http.StatusInternalServerError
 	if he, ok := err.(*echo.HTTPError); ok {

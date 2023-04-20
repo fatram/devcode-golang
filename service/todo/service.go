@@ -29,15 +29,25 @@ func (s *TodoService) Create(ctx context.Context, data interface{}) (interface{}
 		s.logger.Errorf("title cannot be null")
 		return nil, echo.NewHTTPError(http.StatusBadRequest, "title cannot be null")
 	}
+	if todo.ActivityID < 1 {
+		s.logger.Errorf("title cannot be null")
+		return nil, echo.NewHTTPError(http.StatusBadRequest, "activity_group_id cannot be null")
+	}
 
 	timeNow := int(time.Now().Unix())
 	todoEntity := entity.Todo{
 		ActivityID: todo.ActivityID,
 		Title:      todo.Title,
-		Priority:   todo.Priority,
+		Priority:   "very-high",
 		IsActive:   true,
 		CreatedAt:  timeNow,
 		UpdatedAt:  timeNow,
+	}
+	if todo.IsActive != nil {
+		todoEntity.IsActive = *todo.IsActive
+	}
+	if todo.Priority != "" {
+		todoEntity.Priority = todo.Priority
 	}
 	var err error
 	todoEntity.ID, err = s.repository.Create(ctx, todoEntity)
@@ -86,7 +96,7 @@ func (s *TodoService) Get(ctx context.Context, identifier interface{}) (interfac
 func (s *TodoService) GetAll(ctx context.Context, filter model.ToDoFilter) (data []interface{}, err error) {
 	activities, err := s.repository.GetAll(ctx, filter.ActivityID)
 	if err != nil {
-		s.logger.Errorf("error when get all todosactivities: %s", err.Error())
+		s.logger.Errorf("error when get all todos: %s", err.Error())
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "tidak dapat menghambil data todos").SetInternal(err)
 	}
 	data = make([]interface{}, len(activities))
@@ -127,6 +137,15 @@ func (s *TodoService) Update(ctx context.Context, identifier interface{}, data i
 		s.logger.Errorf("error when update todo: %s", err.Error())
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "error at updating todo").SetInternal(err)
 	}
+	todoEntity, err := s.repository.Get(ctx, id)
+	if err != nil {
+		s.logger.Errorf("error at TodoService.Update")
+		return nil, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Todo with ID %d Not Found", id))
+	}
+	if todoEntity == nil {
+		s.logger.Errorf("error at TodoService.Update")
+		return nil, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Todo with ID %d Not Found", id))
+	}
 	todo, ok := data.(*model.TodoUpdate)
 	if !ok {
 		s.logger.Errorf("data tidak sesuai")
@@ -134,30 +153,29 @@ func (s *TodoService) Update(ctx context.Context, identifier interface{}, data i
 	}
 
 	timeNow := int(time.Now().Unix())
-	todoEntity := entity.Todo{
-		ID:        id,
-		Title:     todo.Title,
-		IsActive:  todo.IsActive,
-		Priority:  todo.Priority,
-		UpdatedAt: timeNow,
+	todoEntity.UpdatedAt = timeNow
+	if todo.Title != "" {
+		todoEntity.Title = todo.Title
 	}
-	err = s.repository.Update(ctx, todoEntity)
-	if err != nil {
-		s.logger.Errorf("error at TodoService.Update")
-		return nil, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Todo with ID %d Not Found", id))
+	if todo.Priority != "" {
+		todoEntity.Priority = todo.Priority
 	}
-	updated, err := s.repository.Get(ctx, id)
+	if todo.IsActive != nil {
+		todoEntity.IsActive = *todo.IsActive
+	}
+	s.logger.Print("jaka")
+	err = s.repository.Update(ctx, *todoEntity)
 	if err != nil {
 		s.logger.Errorf("error at TodoService.Update")
 		return nil, echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Todo with ID %d Not Found", id))
 	}
 	return model.Todo{
-		ID:         updated.ID,
-		ActivityID: updated.ActivityID,
-		Title:      updated.Title,
-		Priority:   updated.Priority,
-		IsActive:   updated.IsActive,
-		CreatedAt:  time.Unix(int64(updated.CreatedAt), 0).Format(time.RFC3339),
-		UpdatedAt:  time.Unix(int64(updated.UpdatedAt), 0).Format(time.RFC3339),
+		ID:         todoEntity.ID,
+		ActivityID: todoEntity.ActivityID,
+		Title:      todoEntity.Title,
+		Priority:   todoEntity.Priority,
+		IsActive:   todoEntity.IsActive,
+		CreatedAt:  time.Unix(int64(todoEntity.CreatedAt), 0).Format(time.RFC3339),
+		UpdatedAt:  time.Unix(int64(todoEntity.UpdatedAt), 0).Format(time.RFC3339),
 	}, nil
 }

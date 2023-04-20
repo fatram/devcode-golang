@@ -110,9 +110,13 @@ func (ctr *DeleteActivityControllerImpl) Delete(c echo.Context) (err error) {
 		c.Logger().Errorf("Error on DeleteActivityControllerImpl.Delete: %s", err.Error())
 		return err
 	}
+	empty := struct {
+		ID int `json:"id,omitempty"`
+	}{}
 	response := model.BaseResponse{
 		Status:  "Success",
 		Message: "Success",
+		Data:    empty,
 	}
 	return c.JSON(http.StatusOK, response)
 }

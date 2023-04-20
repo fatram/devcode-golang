@@ -14,20 +14,20 @@ type TodoCreate struct {
 	ActivityID int    `json:"activity_group_id"`
 	Title      string `json:"title"`
 	Priority   string `json:"priority"`
+	IsActive   *bool  `json:"is_active"`
 }
 
 type TodoUpdate struct {
-	IsActive bool   `json:"is_active"`
+	IsActive *bool  `json:"is_active"`
 	Title    string `json:"title"`
 	Priority string `json:"priority"`
 }
 
 type ToDoFilter struct {
-	ActivityID *int `query:"activity_group_id"`
+	ActivityID string `query:"activity_group_id"`
 }
 
 func (filter *ToDoFilter) SetDefaultForEmpty() {
-
 }
 
 func ValidateTodoCreate(validator Validator, data interface{}) error {
