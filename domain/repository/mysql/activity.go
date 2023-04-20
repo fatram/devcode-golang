@@ -35,10 +35,10 @@ func LoadActivityRepository(logger genlog.Logger) repository.ActivityRepository 
 func (r *activityRepositoryImpl) Get(ctx context.Context, id int) (data *entity.Activity, err error) {
 	query := `
 		SELECT
-			id, title, email, created_at, updated_at
+			activity_id, title, email, created_at, updated_at
 		FROM
-			activity
-		WHERE id = ?
+			activities
+		WHERE activity_id = ?
 	`
 	row := r.db.QueryRowContext(ctx, query, id)
 	data = &entity.Activity{}
@@ -55,9 +55,9 @@ func (r *activityRepositoryImpl) Get(ctx context.Context, id int) (data *entity.
 func (r *activityRepositoryImpl) GetAll(ctx context.Context) (data []entity.Activity, err error) {
 	query := `
 		SELECT
-			id, title, email, created_at, updated_at
+			activity_id, title, email, created_at, updated_at
 		FROM
-			activity
+			activities
 	`
 	rows, err := r.db.QueryContext(ctx, query)
 	if err != nil {
@@ -77,7 +77,7 @@ func (r *activityRepositoryImpl) GetAll(ctx context.Context) (data []entity.Acti
 
 func (r activityRepositoryImpl) Create(ctx context.Context, data entity.Activity) (id int, err error) {
 	query := `
-		INSERT INTO activity (title, email, created_at, updated_at)
+		INSERT INTO activities (title, email, created_at, updated_at)
 		VALUES (?, ?, ?, ?)
 	`
 	result, err := r.db.ExecContext(ctx, query, data.Title, data.Email, data.CreatedAt, data.UpdatedAt)
@@ -93,7 +93,7 @@ func (r activityRepositoryImpl) Create(ctx context.Context, data entity.Activity
 
 func (r activityRepositoryImpl) Delete(ctx context.Context, id int) (err error) {
 	query := `
-		DELETE FROM activity WHERE id = ?
+		DELETE FROM activities WHERE activity_id = ?
 	`
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -111,11 +111,11 @@ func (r activityRepositoryImpl) Delete(ctx context.Context, id int) (err error) 
 
 func (r activityRepositoryImpl) Update(ctx context.Context, data entity.Activity) (err error) {
 	query := `
-		UPDATE activity
+		UPDATE activities
 		SET
 			title = ?,
 			updated_at = ?
-		WHERE id = ?
+		WHERE activity_id = ?
 	`
 	result, err := r.db.ExecContext(ctx, query, data.Title, data.UpdatedAt, data.ID)
 	if err != nil {

@@ -35,10 +35,10 @@ func LoadTodoRepository(logger genlog.Logger) repository.TodoRepository {
 func (r *todoRepositoryImpl) Get(ctx context.Context, id int) (data *entity.Todo, err error) {
 	query := `
 		SELECT
-			id, activity_group_id, title, is_active, priority, created_at, updated_at
+			todo_id, activity_group_id, title, is_active, priority, created_at, updated_at
 		FROM
-			todo
-		WHERE id = ?
+			todos
+		WHERE todo_id = ?
 	`
 	row := r.db.QueryRowContext(ctx, query, id)
 	data = &entity.Todo{}
@@ -55,9 +55,9 @@ func (r *todoRepositoryImpl) Get(ctx context.Context, id int) (data *entity.Todo
 func (r *todoRepositoryImpl) GetAll(ctx context.Context, activityID *int) (data []entity.Todo, err error) {
 	query := `
 	SELECT
-		id, activity_group_id, title, is_active, priority, created_at, updated_at
+		todo_id, activity_group_id, title, is_active, priority, created_at, updated_at
 	FROM
-		todo
+		todos
 	`
 	args := []interface{}{}
 	if activityID != nil {
@@ -82,7 +82,7 @@ func (r *todoRepositoryImpl) GetAll(ctx context.Context, activityID *int) (data 
 
 func (r todoRepositoryImpl) Create(ctx context.Context, data entity.Todo) (id int, err error) {
 	query := `
-		INSERT INTO todo (activity_group_id, title, is_active, priority, created_at, updated_at)
+		INSERT INTO todos (activity_group_id, title, is_active, priority, created_at, updated_at)
 		VALUES (?, ?, ?, ?, ?, ?)
 	`
 	result, err := r.db.ExecContext(ctx, query, data.ActivityID, data.Title, data.IsActive, data.Priority, data.CreatedAt, data.UpdatedAt)
@@ -98,7 +98,7 @@ func (r todoRepositoryImpl) Create(ctx context.Context, data entity.Todo) (id in
 
 func (r todoRepositoryImpl) Delete(ctx context.Context, id int) (err error) {
 	query := `
-		DELETE FROM todo WHERE id = ?
+		DELETE FROM todos WHERE todo_id = ?
 	`
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
@@ -116,13 +116,13 @@ func (r todoRepositoryImpl) Delete(ctx context.Context, id int) (err error) {
 
 func (r todoRepositoryImpl) Update(ctx context.Context, data entity.Todo) (err error) {
 	query := `
-		UPDATE todo
+		UPDATE todos
 		SET
 			title = ?,
 			priority = ?,
 			is_active = ?,
 			updated_at = ?
-		WHERE id = ?
+		WHERE todo_id = ?
 	`
 	result, err := r.db.ExecContext(ctx, query, data.Title, data.Priority, data.IsActive, data.UpdatedAt, data.ID)
 	if err != nil {

@@ -28,7 +28,7 @@ type DB interface {
 func LoadMysqlDatabase() *sql.DB {
 	mysqlDatabaseOnce.Do(func() {
 		var err error
-		mysqlDatabase, err = sql.Open(`mysql`, config.Configuration().DatabaseURI)
+		mysqlDatabase, err = sql.Open(`mysql`, config.Configuration().GetDatabaseURI())
 		if err != nil {
 			log.Panicf("cannot connect to MySQL %s", err)
 		}

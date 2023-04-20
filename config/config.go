@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -10,23 +11,29 @@ import (
 )
 
 var (
-	cfg               configuration
-	PublicKey         *[]byte
-	PrivateKey        *[]byte
-	PublicKeyReadOne  sync.Once
-	PrivateKeyReadOne sync.Once
-	cfgOnce           sync.Once
-	envFile           *string
+	cfg                configuration
+	PublicKey          *[]byte
+	PrivateKey         *[]byte
+	PublicKeyReadOne   sync.Once
+	PrivateKeyReadOne  sync.Once
+	DatabaseURIReadOne sync.Once
+	cfgOnce            sync.Once
+	envFile            *string
 )
 
 type configuration struct {
 	Title          string        `env-default:"Golang Test Fatur Rahman"`
 	AccessTokenTTL time.Duration `env:"ACCESS_TOKEN_TTL" env-default:"1440m" env-upd`
-	Port           int           `env:"PORT" env-default:"7007"`
+	Port           int           `env:"PORT" env-default:"3030"`
 	SecretBytes    string        `env:"SECRET_BYTES" env-default:"secret"`
-	DatabaseURI    string        `env:"DATABASE_URI" env-upd env-required`
-	PublicKey      string        `env:"PUBLIC_KEY" env-required`
-	PrivateKey     string        `env:"PRIVATE_KEY" env-required`
+	MysqlHost      string        `env:"MYSQL_HOST" env-upd`
+	MysqlPort      string        `env:"MYSQL_PORT" env-upd`
+	MysqlUser      string        `env:"MYSQL_USER" env-upd`
+	MysqlPassword  string        `env:"MYSQL_PASSWORD" env-upd`
+	MysqlDbname    string        `env:"MYSQL_DBNAME" env-upd`
+	DatabaseURI    string
+	PublicKey      string `env:"PUBLIC_KEY" env-required`
+	PrivateKey     string `env:"PRIVATE_KEY" env-required`
 }
 
 func Configuration() configuration {
@@ -62,6 +69,11 @@ func (c configuration) GetPrivateKey() []byte {
 	return *PrivateKey
 }
 
+func (c configuration) GetDatabaseURI() string {
+	c.DatabaseURI = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?multiStatements=true", c.MysqlUser, c.MysqlPassword, c.MysqlHost, c.MysqlPort, c.MysqlDbname)
+	return c.DatabaseURI
+}
+
 func ReadConfig(file string) {
 	cfgOnce.Do(func() {
 		envFile = &file
@@ -71,7 +83,6 @@ func ReadConfig(file string) {
 			log.Print(err)
 			err := cleanenv.ReadEnv(&cfg)
 			if err != nil {
-				log.Print("ksks")
 				log.Fatalf("Config error %s", err.Error())
 			}
 		}
